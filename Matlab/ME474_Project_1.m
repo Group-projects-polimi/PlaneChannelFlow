@@ -148,7 +148,7 @@ hold on;
 plot(x_coords, T_2D(ny-2,:), 'b');  
 xlabel('x (m)');
 ylabel('Temperature (°C)');
-title('Outlet');
+title('Streamwise Temperature');
 grid on;
 
 % Verify wall surface temperature (plotting the temperature curve at y=0)
