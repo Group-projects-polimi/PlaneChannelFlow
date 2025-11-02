@@ -148,7 +148,7 @@ hold on;
 plot(x_coords, T_2D(ny-2,:), 'b');  
 xlabel('x (m)');
 ylabel('Temperature (°C)');
-title('Streamwise Temperature');
+title('Outlet');
 grid on;
 
 % Verify wall surface temperature (plotting the temperature curve at y=0)
@@ -178,11 +178,21 @@ grid on;
 figure();
 plot(x_coords, T_2D(ceil(ny/2),:), 'r-o', 'LineWidth', 2);
 hold on;
-T_mean_weighted =@(T) u_x(y_coords) * T / sum(u_x(y_coords));
-T_mean_weighted_values = zeros(size(x_coords, 2), 1);
 
-for i=1:size(x_coords, 2)
-    T_mean_weighted_values(i) = T_mean_weighted(T_2D(:,i));
+T_mean_weighted_values = zeros(size(x_coords, 2), 1);
+int_u_x = zeros(size(x_coords, 2), 1);
+
+for j=1:size(x_coords, 2)
+    for i=1:ny
+        if i==1 || i==ny
+            T_mean_weighted_values(j) = T_mean_weighted_values(j)+ u_x(y_coords(i))*(T_2D(i,j))*dy/2;
+            int_u_x(j)=int_u_x(j)+u_x(y_coords(i))*dy/2;
+        else
+            T_mean_weighted_values(j) = T_mean_weighted_values(j)+ u_x(y_coords(i))*(T_2D(i,j))*dy;
+            int_u_x(j)=int_u_x(j)+u_x(y_coords(i))*dy;
+        end
+    end
+    T_mean_weighted_values(j)=T_mean_weighted_values(j)/int_u_x(j);
 end
 
 plot(x_coords, T_mean_weighted_values, 'b-o', 'LineWidth', 2);
@@ -243,7 +253,7 @@ for j = 1:nx
     guess(n) = T_wall;
 end
 
-[error1, residual1, it1, sol] = sor(A, b, 1, guess, 1e-5);
+[error1, residual1, it1, ~] = sor(A, b, 1, guess, 1e-5);
 [error2, residual2, it2, sol] = sor(A, b, 1.5, guess, 1e-5);
 
 figure();

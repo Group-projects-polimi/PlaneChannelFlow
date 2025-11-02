@@ -53,7 +53,7 @@ Physical coordinates: x increases from inlet to outlet, y from lower to upper wa
 
 \vspace{2.5pt}
 \paragraph{Setup.}
-Consider a fluid flowing through a plane channel between horizontal walls located in $y = 0$ and $y = H$ as shown in Figure \ref{channel_domain}. The temperature field $T(x, y)$ is the solution of the steady heat equation, $\nabla\cdot(\rho\,u\,T)=\nabla\cdot(\Gamma\,\nabla T)$. Here, the density $\rho$, the velocity field $u$=$[u_x , u_y]^T$ and the thermal properties are known ($\Gamma = k/c_p$ is the ratio of thermal conductivity $k$ to specific heat capacity $c_p$). Assume that $T$ is a passive scalar, i.e. the fluid properties and the velocity field are independent of temperature. The two-dimensional numerical domain is a simple rectangle such that $0 \leq x\leq L$ and $0 \leq y \leq H$. Also, consider a structured mesh with $n_x$ cells in the $x$ direction and $n_y$ cells in the $y$ direction, then $\Delta x = L/(n_x-1)$, $\Delta y = H/(n_y-1)$. Here, the denominator is $n_x - 1$ instead of $n_x$ because the boundary control volumes, as will be explained later, are cut in half so that their nodes sit exactly on the inlet, outlet or the walls. Indices $i, j$ range from 1 to $n_y, n_x$ respectively. By convention, the origin $(x,y)=(0,0)$ corresponds to the upper-left corner of the domain and thus to the center of the upper-left control-volume which is indexed by $(i,j)=(1,1)$, while $(i,j)=(n_y,n_x)$ are the indexes of the bottom-right CV.
+Consider a fluid flowing through a plane channel between horizontal walls located in $y = 0$ and $y = H$ as shown in Figure \ref{channel_domain}. The temperature field $T(x, y)$ is the solution of the steady heat equation, $\nabla\cdot(\rho\,u\,T)=\nabla\cdot(\Gamma\,\nabla T)$. Here, the density $\rho$, the velocity field $u$=$[u_x , u_y]^T$ and the thermal properties are known ($\Gamma = k/c_p$ is the ratio of thermal conductivity $k$ to specific heat capacity $c_p$). Assume that $T$ is a passive scalar, i.e. the fluid properties and the velocity field are independent of temperature. The two-dimensional numerical domain is a simple rectangle such that $0 \leq x\leq L$ and $0 \leq y \leq H$. Also, consider a structured mesh with $n_x$ cells in the $x$ direction and $n_y$ cells in the $y$ direction, then $\Delta x = L/(n_x-1)$, $\Delta y = H/(n_y-1)$. Here, the denominator is $n_x - 1$ instead of $n_x$ because the boundary control volumes, as will be explained later, are cut in half so that their nodes sit exactly on the inlet, outlet or the walls. Indices $i, j$ range from 1 to $n_y, n_x$ respectively. By convention, the origin $(x,y)=(0,0)$ corresponds to the upper-left corner of the domain and thus to the center of the upper-left control-volume which is indexed by $(i,j)=(1,1)$, while $(i,j)=(n_y,n_x)$ are the indexes of the center of the bottom-right CV.
 \input{channel.tex}
 
 \bigskip
@@ -205,7 +205,7 @@ With this convention \(W\) and \(E\) are located along the streamwise ($x$) dire
 \bigskip
 
 \textbf{6. DOF numbering and mapping.}
-Once discretized, the unknown $T$ is a vector of $N = n_x \cdot n_y$ values. We number these $N$ degrees of freedom (DOFs) by flattening $(i,j)$ into a single index $n$ with row-major, bottom-to-top ordering
+Once discretized, the unknown $T$ is a vector of $N = n_x \cdot n_y$ values. We number these $N$ degrees of freedom (DOFs) by flattening $(i,j)$ into a single index $n$ with row-major, top-to-bottom ordering
 \[
 n = (i-1)\,n_x + j=1,\dots,n_x n_y
 \]
@@ -285,41 +285,44 @@ As demonstrated by the plots in Figure \ref{boundary_condition}, the solution re
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{Latex/MATLABfigures/12.png} 
-    \caption{Top left plot shows how our solution assumes the inlet boundary condition; bottom left and bottom right respectively show how our solution correctly assumes the boundary conditions for the lower and upper wall; The top right plot shows streamwise temperature evolution of our solution evaluated at two different heights (y=0.75, y=0.5), indeed we observe a Neumann condition at x=L.}
+    \caption{Top left plot shows how our solution assumes the inlet boundary condition; bottom left and bottom right respectively show how our solution correctly assumes the boundary conditions for the lower and upper wall; top right plot shows streamwise temperature evolution of our solution evaluated at two different heights (y=0.75, y=0.5), indeed we observe a Neumann condition at x=L.}
     \label{boundary_condition}
 \end{figure}
 
 \textbf{13. Temperature plots.} 
-The 2D plot of the solution can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in the Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted, as well as the entry length ($x_e = 2.449$).
+The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted together with the entry length ($x_e = 2.449$). Note that the weighted mean temperature, defined as $T_{mean}(x) = \dfrac{\int_{0}^{H}u_x(y)T(x,y)dy}{\int_{0}^{H}u_x(y)dy}$, is computed numerically, summing up all the contributions over the spanwise direction, in order to approximate the two integrals.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/13_1.png} 
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/13_1.png} 
     \caption{Temperature field at the outlet.}
     \label{outlet_temperature}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/13_2.png} 
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/13_2.png} 
     \caption{Centerline and velocity-weighted mean temperature.}
     \label{cent_mean_temp}
 \end{figure}
 
 \textbf{14. Iterative methods.} 
+In order to solve the system $AT=b$, instead of the Matlab backslash, we implement the Successive Over Relaxation method: starting for a suitable initial guess $T^0$, that respect the boundary conditions (for example a $T^0$ equal to $50^\circ C$ on the inlet and $100^\circ C$ on the two walls), the method monitor the values of relative iteration error $||T^k - T^{k-1}||_2\,/\,||T^{k-1}||_2 $ (Figure \ref{relative_error}), and the normalized residuals $||AT^k - b||_2\,/\,||diag(A)\,T^k||_2 $ (Figure \ref{residuals}), and stop when both are smaller than the tolerance $10^{-5}$. The SOR method is an algorithm that includes a relaxation parameter, $w$, to control its convergence. The choice of this parameter is critical: setting $w=1$ simplifies the algorithm to the standard Gauss-Seidel method. In contrast, setting w in the range $1<w<2$ (in this case, $w=1.5$) applies over-relaxation, a technique designed to accelerate convergence. The simulation using the Gauss-Seidel method took 35 iterations to meet the stopping criteria, while the over-relaxation method converged significantly faster, requiring only 23 iterations.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/14_1.png} 
     \caption{Temperature field at the outlet.}
-    \label{outlet_temperature}
+    \label{relative_error}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/14_2.png} 
     \caption{Centerline and velocity-weighted mean temperature.}
-    \label{cent_mean_temp}
+    \label{residuals}
 \end{figure}
 
+\textbf{15.} 
 
 \end{document}
