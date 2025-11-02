@@ -204,10 +204,13 @@ legend('Centerline temperature', 'Weighted mean temperature', 'Entry length', 'F
 disp(x_coords(x_entry_index));
 
 %%% 14.
-function [it, sol] = sor(A, b, w, guess, tol)
+function [error, residual, it, sol] = sor(A, b, w, guess, tol)
     n = size(b,1);
     sol = guess;
     solnew = zeros(n,1);
+
+    error = [];
+    residual = [];
 
     it = 0;
     var1 = tol + 1;
@@ -221,6 +224,9 @@ function [it, sol] = sor(A, b, w, guess, tol)
         sol = (1 - w) * sol + w * solnew;
         var1 = sqrt(sum((sol - solold).^2)) / sqrt(sum((solold).^2));
         var2 = sqrt(sum((A*sol - b).^2)) / sqrt(sum((diag(A)' * sol).^2));
+
+        error(end + 1) = var1;
+        residual(end + 1) = var2;
         it = it + 1;
     end
 end
@@ -237,4 +243,28 @@ for j = 1:nx
     guess(n) = T_wall;
 end
 
-[it, sol] = sor(A, b, 1.7, guess, 1e-5);
+[error1, residual1, it1, sol] = sor(A, b, 1, guess, 1e-5);
+[error2, residual2, it2, sol] = sor(A, b, 1.5, guess, 1e-5);
+
+figure();
+iter1 = 1:1:it1;
+iter2 = 1:1:it2;
+plot(iter1, error1, 'LineWidth', 2);
+hold on;
+plot(iter2, error2, 'LineWidth', 2);
+grid on;
+xlabel('Iterations', 'FontSize', 20);
+ylabel('Relative iteration error', 'FontSize', 20);
+legend('Relative error (w=1)', 'Relative error (w=1.5)', 'FontSize', 20);
+
+figure();
+plot(iter1, residual1, 'LineWidth', 2);
+hold on;
+plot(iter2, residual2, 'LineWidth', 2);
+grid on;
+xlabel('Iterations', 'FontSize', 20);
+ylabel('Normalized residuals', 'FontSize', 20);
+legend('Normalized residual (w=1)', 'Normalized residual (w=1.5)', 'FontSize', 20);
+
+disp(it1);
+disp(it2);
