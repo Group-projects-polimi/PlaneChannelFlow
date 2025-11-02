@@ -169,14 +169,14 @@ grid on;
 
 %%% 13.
 figure();
-plot(y_coords, T_2D(:, nx), 'b-o', 'MarkerFaceColor', 'blue');             
-xlabel('y (m)',  'FontSize', 15);
-ylabel('Temperature (°C)', 'FontSize', 15);
+plot(y_coords, T_2D(:, nx), 'b-o', 'MarkerFaceColor', 'blue', 'LineWidth', 2);             
+xlabel('y (m)',  'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
 %title('Outlet');
 grid on;
 
 figure();
-plot(x_coords, T_2D(ceil(ny/2),:), 'r-o');
+plot(x_coords, T_2D(ceil(ny/2),:), 'r-o', 'LineWidth', 2);
 hold on;
 T_mean_weighted =@(T) u_x(y_coords) * T / sum(u_x(y_coords));
 T_mean_weighted_values = zeros(size(x_coords, 2), 1);
@@ -185,9 +185,9 @@ for i=1:size(x_coords, 2)
     T_mean_weighted_values(i) = T_mean_weighted(T_2D(:,i));
 end
 
-plot(x_coords, T_mean_weighted_values, 'b-o');
-xlabel('x (m)', 'FontSize', 15);
-ylabel('Temperature (°C)', 'FontSize', 15);
+plot(x_coords, T_mean_weighted_values, 'b-o', 'LineWidth', 2);
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
 %title('Wall (y = H)');
 grid on;
 
