@@ -266,5 +266,5 @@ xlabel('Iterations', 'FontSize', 20);
 ylabel('Normalized residuals', 'FontSize', 20);
 legend('Normalized residual (w=1)', 'Normalized residual (w=1.5)', 'FontSize', 20);
 
-disp(it1);
-disp(it2);
+fprintf('Number of iterations with Gauss-Seidel (w=1): %d\n', it1);
+fprintf('Number of iterations with over_relaxation (w=1.5): %d\n', it2);
