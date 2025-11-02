@@ -1,0 +1,30 @@
+\begin{figure}[h!]
+    \centering
+    \begin{tikzpicture}[
+        scale=0.5,
+        font=\small
+    ]
+        \coordinate (origin) at (0,0);
+        \coordinate (L_end) at (10,0);
+        \coordinate (H_end) at (0,4);  
+        \coordinate (LH_end) at (10,4);
+
+        \draw[line width=2pt, fill=gray!10] (origin) -- (L_end);
+        \draw[line width=2pt, fill=gray!10] (H_end) -- (LH_end);
+        
+        %\draw[dashed, line width=1pt] (origin) -- (H_end);
+        \draw[dashed, line width=1pt] (L_end) -- (LH_end);
+
+        \draw[->, thick, -{Latex[length=2mm]}] (-1,0) -- (11, 0) node[right] {$x$};
+        \draw[->, thick, -{Latex[length=2mm]}] (0,-1) -- (0, 5) node[above] {$y$};
+        %\node[below left=1mm and 1mm] at (origin) {$(0,0)$};
+
+        \draw[<->] (0, -0.5) -- (10, -0.5);
+        \node[below] at (5, -0.5) {$L$};
+        \draw[<->] (-0.5, 0) -- (-0.5, 4);
+        \node[left] at (-0.5, 2) {$H$};
+
+    \end{tikzpicture}    
+    \caption{Schematic of the 2D plane channel flow domain.}
+    \label{channel_domain}
+\end{figure}
