@@ -19,6 +19,7 @@ right=1in]{geometry}
 \usepackage{float}
 \usepackage{verbatim}
 \usepackage{tikz}
+\usepackage{subcaption}
 
 \usepackage[colorlinks=true, linkcolor=blue]{hyperref}
 \usepackage{hyperref}
@@ -273,11 +274,39 @@ Assume $T_\text{inlet} = 50^\circ C$ and $T_\text{wall} = 100^\circ C$. On a coa
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{Latex/MATLAB figures/Coarse-mesh temperature field.png} 
-    \caption{Channel temperature field (\(n_x=50\), \(n_y=5\))}
+    \includegraphics[width=1\textwidth]{Latex/MATLABfigures/11.png} 
+    \caption{Channel temperature field (\(n_x=50\), \(n_y=5\)).}
     \label{temperature_field}
 \end{figure}
 
-\textbf{11. Coarse Mesh Solution and Visualization.}
+\textbf{12. Boundary conditions verification.}
+As demonstrated by the plots in Figure \ref{boundary_condition}, the solution respects all boundary conditions. Indeed we can see that: for the inlet the solution assumes the value $T_\text{wall} = 100^\circ C$ at the edges and the value $T_\text{inlet} = 50^\circ C$ for the internal nodes; at the outlet the functions $T(x,0.75)$ and $T(x,0.5)$ becomes flat when they reach $L=10\,m$, this means that their derivative with respect to x, at the end of the channel, is zero, as stated by the Neumann conditions; for the two horizontal walls is clear that the value remain constant to $T_\text{wall} = 100^\circ C$ both at $y=0$ and $y=H$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Latex/MATLABfigures/12.png} 
+    \caption{Boundary condition verification.}
+    \label{boundary_condition}
+\end{figure}
+
+\textbf{13. Temperature plots.} 
+The 2D plot of the solution can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in the Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted, as well as the entry length ($x_e = 2.449$).
+
+\begin{figure}[H]
+    \centering 
+    \begin{subfigure}[t]{0.51\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Latex/MATLABfigures/13_1.png}
+        \caption{Temperature field at the outlet.}
+        \label{outlet_temperature}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Latex/MATLABfigures/13_2.png}
+        \caption{Centerline and velocity-weighted mean temperature.}
+        \label{cent_mean_temp}
+    \end{subfigure}
+\end{figure}
 
 \end{document}

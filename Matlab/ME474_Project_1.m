@@ -1,6 +1,6 @@
 clear;
 clc;
-close;
+close all;
 
 % Physical Parameters
 rho = 1;  % Density kg/m^3
@@ -26,7 +26,7 @@ T_in = 50;  % Inlet temperature °C
 T_wall = 100;  % Wall temperature °C
 
 % Velocity Field Function
-u_x = @(y) 6*u_mean*(y/H)*(1-(y/H));
+u_x = @(y) 6*u_mean.*(y/H).*(1-(y/H));
 
 % Initialize coefficient matrix A and right-hand side vector b
 A = zeros(N, N);
@@ -125,47 +125,116 @@ figure('Name', 'Coarse-mesh temperature field');
 pcolor(X, Y, T_2D);   
 shading interp;
 colorbar;               
-xlabel('x (m)');       
-ylabel('y (m)');        
+xlabel('x (m)', 'FontSize', 15);       
+ylabel('y (m)', 'FontSize', 15);        
 %title(['Channel temperature field（nx=' num2str(nx) ', ny=' num2str(ny) '）']);
 axis equal tight;
 
-%{
 %%% 12.
+figure('Name', 'Boundary conditions validation');
+
 % Verify inlet temperature (plotting the temperature curve at x=0)
-figure('Name', 'Inlet Temperature Validation');
-plot(y_coords, T_2D(:, 1), 'b-o'); 
-ylim([T_in-1, T_in+1]);             
+subplot(2, 2, 1);
+plot(y_coords, T_2D(:, 1), 'b-o', 'MarkerFaceColor', 'blue');             
 xlabel('y (m)');
 ylabel('Temperature (°C)');
-title('Temperature Distribution at the Inlet Boundary');
+title('Inlet');
+grid on;
+
+% Verify visualizartion of the outlet temperature
+subplot(2, 2, 2);
+plot(x_coords, T_2D(2,:), 'b');  
+hold on;
+plot(x_coords, T_2D(ny-2,:), 'b');  
+xlabel('x (m)');
+ylabel('Temperature (°C)');
+title('Outlet');
 grid on;
 
 % Verify wall surface temperature (plotting the temperature curve at y=0)
-figure('Name', 'Lower Wall Temperature Verification');
-plot(x_coords, T_2D(1, :), 'r-o'); 
-ylim([T_wall-1, T_wall+1]);        
+subplot(2, 2, 3);
+plot(x_coords, T_2D(ny, :), 'r-o');        
 xlabel('x (m)');
 ylabel('Temperature (°C)');
-title('Temperature distribution on the lower wall surface');
+title('Wall (y = 0)');
 grid on;
 
-
-%%% 13. 
-%visualizartion of the outlet temperature
-figure('Name', 'Visualization of the outlet temperature');
-plot(y_coords, T_2D(:, nx), 'r-o'); 
-%ylim([T_wall-1, T_wall+1]);        
-xlabel('y (m)');
-ylabel('Temperature (°C)');
-title('Temperature distribution on the outlet');
-grid on;
-%visualization of the centerline temperature
-figure('Name', 'Visualization of the centerline temperature');
-plot(x_coords, T_2D(ceil(ny/2),:), 'r-o'); 
-%ylim([T_wall-1, T_wall+1]);        
+% Verify wall surface temperature (plotting the temperature curve at y=H)
+subplot(2, 2, 4);
+plot(x_coords, T_2D(1,:), 'r-o');       
 xlabel('x (m)');
 ylabel('Temperature (°C)');
-title('Temperature distribution on the centerline');
+title('Wall (y = H)');
 grid on;
-%}
+
+%%% 13.
+figure();
+plot(y_coords, T_2D(:, nx), 'b-o', 'MarkerFaceColor', 'blue');             
+xlabel('y (m)',  'FontSize', 15);
+ylabel('Temperature (°C)', 'FontSize', 15);
+%title('Outlet');
+grid on;
+
+figure();
+plot(x_coords, T_2D(ceil(ny/2),:), 'r-o');
+hold on;
+T_mean_weighted =@(T) u_x(y_coords) * T / sum(u_x(y_coords));
+T_mean_weighted_values = zeros(size(x_coords, 2), 1);
+
+for i=1:size(x_coords, 2)
+    T_mean_weighted_values(i) = T_mean_weighted(T_2D(:,i));
+end
+
+plot(x_coords, T_mean_weighted_values, 'b-o');
+xlabel('x (m)', 'FontSize', 15);
+ylabel('Temperature (°C)', 'FontSize', 15);
+%title('Wall (y = H)');
+grid on;
+
+x_entry_index = 0;
+for i=1:size(x_coords, 2)
+    if T_2D(ceil(ny/2),i) >= 0.9 * T_wall
+        x_entry_index = i;
+        break
+    end
+end
+
+xline(x_coords(x_entry_index), '-', 'LineWidth', 3);
+legend('Centerline temperature', 'Weighted mean temperature', 'Entry length', 'FontSize', 20)
+disp(x_coords(x_entry_index));
+
+%%% 14.
+function [it, sol] = sor(A, b, w, guess, tol)
+    n = size(b,1);
+    sol = guess;
+    solnew = zeros(n,1);
+
+    it = 0;
+    var1 = tol + 1;
+    var2 = tol + 1;
+    while var1 > tol || var2 > tol
+        for i=1:n
+            solnew(i) = (b(i) - A(i, i+1:end)*sol(i+1:end) - A(i, 1:i-1)*solnew(1:i-1)) / A(i, i);
+        end
+
+        solold = sol;
+        sol = (1 - w) * sol + w * solnew;
+        var1 = sqrt(sum((sol - solold).^2)) / sqrt(sum((solold).^2));
+        var2 = sqrt(sum((A*sol - b).^2)) / sqrt(sum((diag(A)' * sol).^2));
+        it = it + 1;
+    end
+end
+
+guess = 50*ones(N, 1);
+
+for j = 1:nx
+    % Lower wall surface
+    n = (ny-1)*nx + j;
+    guess(n) = T_wall;
+    
+    % Upper wall surface
+    n = j;
+    guess(n) = T_wall;
+end
+
+[it, sol] = sor(A, b, 1.7, guess, 1e-5);
