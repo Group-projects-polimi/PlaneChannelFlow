@@ -35,7 +35,7 @@ right=1in]{geometry}
 \begin{document}
 \begin{figure}[t!]
 \centering
-\includegraphics[width=60mm]{logo-modified.png}
+\includegraphics[width=60mm]{Latex/logoEPFL.png}
 \end{figure}
 
 \begin{center}
@@ -318,7 +318,13 @@ In order to solve the system $AT=b$, instead of the Matlab backslash, we impleme
 \end{figure}
 
 \textbf{15. Nusselt Number computation}
-Consider the Nusselt Number defined as $Nu = \frac{\partial T / \partial n}{\Delta T / (2H)}$ where $\Delta T = T_{wall}\,-T_{mean}$. For laminar flows in plane channels, as shown by \cite{nusselt}, Nu(x) decreases in the entrance region but, far enough downstream of the inlet, approaches a constant value independent of the Peclet number, this behavior can be observed in Figure \ref{nusselt}. However, contrary to theoretical expectations, the figure also shows a sudden increase in $Nu(x)$ near the outlet. This unexpected trend a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality, there is still heat transfer occurring at the outlet, full development is just an approximation. This means that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the artificial Neumann condition. This unnatural distortion pollutes the solution upstream of the outlet and ultimately the Nusselt number which is calculated using the temperature gradient at the wall and the velocity-averaged mean fluid temperature. Because the solver is distorting the entire temperature field in the final cells, the calculated wall gradient is smaller than what it should be, leading to the artificial spike in the $\mathrm{Nu}$ value we observe.
+Consider the Nusselt Number defined as 
+\[Nu = \frac{\partial T / \partial n}{\Delta T / (2H)} \text{ with }  \Delta T = T_{wall}\,-T_{mean}\] 
+Where $\Delta T$ is the difference between the wall temperature and the velocity-averaged mean temperature $T_{mean}$ defined earlier. For laminar flows in plane channels, as shown by \cite{nusselt}, $\mathrm{Nu}(x)$ decreases in the entrance region, but far enough downstream of the inlet it approaches a constant value independent of the Péclet number. To remark that we're working in the case of uniform wall temperature, the Nusselt number is indicated as $\mathrm{Nu_T}(x)$. Numerically, we compute $\mathrm{Nu_T}(x)$ by approximating the velocity-averaged mean temperature (as in question 13) and the normal derivative of the temperature at the wall using a finite difference, the resulting $\mathrm{Nu_T}(x)$ along the lower wall can be observed in Figure \ref{nusselt}. It tends to a limit of 6.68, which we found to be reasonably close to the expected value of 7.54. 
+
+However, contrary to theoretical expectations, the trend also presents a sudden spike in Nusselt value near the outlet. This feature is a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality there is still heat transfer occurring at the outlet, meaning that such condition on the gradients is too restrictive. As a consequence. this produces a model incapable of capturing the essence of our phenomenon. 
+
+This means that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the Neumann condition. This distortion then pollutes the entire temperature field upstream of the outlet rendering the calculated wall gradient smaller than what is expected form experiments, leading to the artificial spike in the value of $\mathrm{Nu}$ we observe.
 
 \begin{figure}[H]
     \centering
@@ -326,6 +332,8 @@ Consider the Nusselt Number defined as $Nu = \frac{\partial T / \partial n}{\Del
     \caption{Nusselt Number along the lower wall.}
     \label{nusselt}
 \end{figure}
+
+\textbf{16.}
 
 \bibliographystyle{plain}
 \bibliography{literature}

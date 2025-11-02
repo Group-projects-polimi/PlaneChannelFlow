@@ -14,13 +14,6 @@ Pe = 16.5;  % Peclet number
 u_mean = Pe*Gamma/(2*H*rho);  % Average speed m/s
 Re = 2*H*u_mean/nu;  % Reynolds number
 
-% Mesh Parameters
-nx = 50;  % Coarse mesh x refinement
-ny = 5;  % Coarse mesh y refinement
-dx = L/(nx-1);
-dy = H/(ny-1);
-N = nx*ny; % DOF number
-
 % Boundary Temperature Parameters
 T_in = 50;  % Inlet temperature °C
 T_wall = 100;  % Wall temperature °C
@@ -28,55 +21,23 @@ T_wall = 100;  % Wall temperature °C
 % Velocity Field Function
 u_x = @(y) 6*u_mean.*(y/H).*(1-(y/H));
 
-% Initialize coefficient matrix A and right-hand side vector b
-A = zeros(N, N);
-b = zeros(N, 1);
+function [A, b, T_2D] = compute_sol(nx, ny, L, H, Gamma, rho, u_x, T_in, T_wall)
+    dx = L/(nx-1);
+    dy = H/(ny-1);
+    N = nx*ny; % DOF number
 
-% Fill in the Equations for the internal CV
-% Diffusion coefficient
-D_e = Gamma*dy/dx;  % Eastern
-D_w = Gamma*dy/dx;  % Western
-D_n = Gamma*dx/dy;  % Northern
-D_s = Gamma*dx/dy;  % Southern
-
-for i = 2:(ny-1)
-% Advection coefficient
-y_e = H - (i-1)*dy;  % y_eastern
-ux_e = u_x(y_e);  % Mean velocity
-F_e = rho * ux_e * dy;  % Eastbound convection flux
-F_w = F_e;  % Incompressible flow
-
-% Coefficients of Algebraic Equations
-a_E = D_e + max(-F_e,0);
-a_W = D_w + max(F_w,0);
-a_N = D_n;
-a_S = D_s;
-a_P = a_E + a_W + a_N + a_S;
-
-    for j = 2:(nx-1)
-        n = (i-1)*nx + j;
-
-        % Fill matrix A (The internal CV has no source term, so b(n) is zero
-        A(n,n) = a_P;
-        A(n,n+1) = -a_E;
-        A(n,n-1) = -a_W;
-        A(n,n+nx) = -a_N;
-        A(n,n-nx) = -a_S;
-    end
-end
-
-% Fill boundary conditions at the inlet (Dirichlet T=T_in)
-for i = 2:ny-1
-    n = (i-1)*nx + 1;
-    A(n,:) = 0;
-    A(n,n) = 1;
-    b(n) = T_in;
-end
-
-% Fill the boundary conditions at the outlet (Neumann)
-for i = 2:ny-1
-    n = (i-1)*nx + nx;
-
+    % Initialize coefficient matrix A and right-hand side vector b
+    A = zeros(N, N);
+    b = zeros(N, 1);
+    
+    % Fill in the Equations for the internal CV
+    % Diffusion coefficient
+    D_e = Gamma*dy/dx;  % Eastern
+    D_w = Gamma*dy/dx;  % Western
+    D_n = Gamma*dx/dy;  % Northern
+    D_s = Gamma*dx/dy;  % Southern
+    
+    for i = 2:(ny-1)
     % Advection coefficient
     y_e = H - (i-1)*dy;  % y_eastern
     ux_e = u_x(y_e);  % Mean velocity
@@ -84,38 +45,84 @@ for i = 2:ny-1
     F_w = F_e;  % Incompressible flow
     
     % Coefficients of Algebraic Equations
+    a_E = D_e + max(-F_e,0);
     a_W = D_w + max(F_w,0);
     a_N = D_n;
     a_S = D_s;
-    a_P = a_W + a_N + a_S;
-
-    A(n,n) = a_P;
-    A(n,n+1) = 0;
-    A(n,n-1) = -a_W;
-    A(n, n+nx) = -a_N;
-    A(n, n-nx) = -a_S;
-    b(n) = 0;
-end
-
-% Fill boundary conditions at the walls including 4 corner CVs (Dirichlet T=T_wall)
-for j = 1:nx
-    % Lower wall surface
-    n = (ny-1)*nx + j;
-    A(n,:) = 0;
-    A(n,n) = 1;
-    b(n) = T_wall;
+    a_P = a_E + a_W + a_N + a_S;
     
-    % Upper wall surface
-    n = j;
-    A(n,:) = 0;
-    A(n,n) = 1;
-    b(n) = T_wall;
+        for j = 2:(nx-1)
+            n = (i-1)*nx + j;
+    
+            % Fill matrix A (The internal CV has no source term, so b(n) is zero
+            A(n,n) = a_P;
+            A(n,n+1) = -a_E;
+            A(n,n-1) = -a_W;
+            A(n,n-nx) = -a_N;
+            A(n,n+nx) = -a_S;
+        end
+    end
+    
+    % Fill boundary conditions at the inlet (Dirichlet T=T_in)
+    for i = 2:ny-1
+        n = (i-1)*nx + 1;
+        A(n,:) = 0;
+        A(n,n) = 1;
+        b(n) = T_in;
+    end
+    
+    % Fill the boundary conditions at the outlet (Neumann)
+    for i = 2:ny-1
+        n = (i-1)*nx + nx;
+    
+        % Advection coefficient
+        y_e = H - (i-1)*dy;  % y_eastern
+        ux_e = u_x(y_e);  % Mean velocity
+        F_e = rho * ux_e * dy;  % Eastbound convection flux
+        F_w = F_e;  % Incompressible flow
+        
+        % Coefficients of Algebraic Equations
+        a_W = D_w + max(F_w,0);
+        a_N = D_n;
+        a_S = D_s;
+        a_P = a_W + a_N + a_S;
+    
+        A(n,n) = a_P;
+        A(n,n+1) = 0;
+        A(n,n-1) = -a_W;
+        A(n, n-nx) = -a_N;
+        A(n, n+nx) = -a_S;
+        b(n) = 0;
+    end
+    
+    % Fill boundary conditions at the walls including 4 corner CVs (Dirichlet T=T_wall)
+    for j = 1:nx
+        % Lower wall surface
+        n = (ny-1)*nx + j;
+        A(n,:) = 0;
+        A(n,n) = 1;
+        b(n) = T_wall;
+        
+        % Upper wall surface
+        n = j;
+        A(n,:) = 0;
+        A(n,n) = 1;
+        b(n) = T_wall;
+    end
+    
+    % Solve the linear equation system
+    T = A\b;
+
+    T_2D = reshape(T, nx, ny)';
 end
 
-% Solve the linear equation system
-T = A\b;
+nx = 50;
+ny = 5;
+dx = L/(nx-1);
+dy = H/(ny-1);
+N = nx*ny;
 
-T_2D = reshape(T, nx, ny)';
+[A, b, T_2D] = compute_sol(nx, ny, L, H, Gamma, rho, u_x, T_in, T_wall);
 x_coords = linspace(0, L, nx);   
 y_coords = linspace(0, H, ny);    
 [X, Y] = meshgrid(x_coords, y_coords);
@@ -179,10 +186,10 @@ figure();
 plot(x_coords, T_2D(ceil(ny/2),:), 'r-o', 'LineWidth', 2);
 hold on;
 
-T_mean_weighted_values = zeros(size(x_coords, 2), 1);
-int_u_x = zeros(size(x_coords, 2), 1);
+T_mean_weighted_values = zeros(nx, 1);
+int_u_x = zeros(nx, 1);
 
-for j=1:size(x_coords, 2)
+for j=1:nx
     for i=1:ny
         if i==1 || i==ny
             T_mean_weighted_values(j) = T_mean_weighted_values(j)+ u_x(y_coords(i))*(T_2D(i,j))*dy/2;
@@ -276,5 +283,46 @@ xlabel('Iterations', 'FontSize', 20);
 ylabel('Normalized residuals', 'FontSize', 20);
 legend('Normalized residual (w=1)', 'Normalized residual (w=1.5)', 'FontSize', 20);
 
-fprintf('Number of iterations with Gauss-Seidel (w=1): %d\n', it1);
-fprintf('Number of iterations with over_relaxation (w=1.5): %d\n', it2);
+disp(it1);
+disp(it2);
+
+%%% 15.
+q = -((T_2D(ny-1, :) - T_2D(ny, :)) / dy)';
+deltaT = T_wall - T_mean_weighted_values;
+Nu = q ./ deltaT * 2 * H;
+
+figure();
+plot(x_coords, Nu, 'LineWidth', 2);
+grid on;
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Nu', 'FontSize', 20);
+
+%%% 16.
+nx_vec = [50, 100, 200, 400];
+ny_vec = [5, 11, 21, 41];
+x_coords_vec = zeros(4, 400);
+y_coords_vec = zeros(4, 41);
+outlet_temperatures = zeros(4, 41);
+centerline_temperatures = zeros(4, 400);
+vam_temperatures = zeros(4, 400);
+entry_lengths = (4);
+nus = zeros(4, 400);
+
+for i=1:4
+    [A, b, T_2D] = compute_sol(nx_vec(i), ny_vec(i), L, H, Gamma, rho, u_x, T_in, T_wall);
+    x_coords_vec(i, 1:nx_vec(i)) = linspace(0, L, nx_vec(i));   
+    y_coords_vec(i, 1:ny_vec(i)) = linspace(0, H, ny_vec(i));
+    outlet_temperatures(i, 1:ny_vec(i)) = T_2D(:, nx_vec(i));
+end
+
+figure();
+subplot(2, 2, 1);
+for i=1:4
+    plot(y_coords_vec(i, 1:ny_vec(i)), outlet_temperatures(i,1:ny_vec(i)), 'LineWidth', 2);
+    hold on;
+end
+
+grid on;
+xlabel('y (m)');
+ylabel('Temperature (°C)');
+title('Outlet');
