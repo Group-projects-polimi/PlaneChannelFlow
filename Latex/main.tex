@@ -45,16 +45,10 @@ right=1in]{geometry}
 {\large ?, 4141363, 414991, 394806}
 \end{center}
 
-\begin{comment}
-The mesh has nx cells in x and ny cells in y.
-Convention: (i,j) = (1,1) is the bottom-left CV center, (i,j) = (nx,ny) is the top-right CV center.
-Physical coordinates: x increases from inlet to outlet, y from lower to upper wall.
-\end{comment}
-
 \vspace{2.5pt}
 \paragraph{Setup.}
 Consider a fluid flowing through a plane channel between horizontal walls located in $y = 0$ and $y = H$ as shown in Figure \ref{channel_domain}. The temperature field $T(x, y)$ is the solution of the steady heat equation, $\nabla\cdot(\rho\,u\,T)=\nabla\cdot(\Gamma\,\nabla T)$. Here, the density $\rho$, the velocity field $u$=$[u_x , u_y]^T$ and the thermal properties are known ($\Gamma = k/c_p$ is the ratio of thermal conductivity $k$ to specific heat capacity $c_p$). Assume that $T$ is a passive scalar, i.e. the fluid properties and the velocity field are independent of temperature. The two-dimensional numerical domain is a simple rectangle such that $0 \leq x\leq L$ and $0 \leq y \leq H$. Also, consider a structured mesh with $n_x$ cells in the $x$ direction and $n_y$ cells in the $y$ direction, then $\Delta x = L/(n_x-1)$, $\Delta y = H/(n_y-1)$. Here, the denominator is $n_x - 1$ instead of $n_x$ because the boundary control volumes, as will be explained later, are cut in half so that their nodes sit exactly on the inlet, outlet or the walls. Indices $i, j$ range from 1 to $n_y, n_x$ respectively. By convention, the origin $(x,y)=(0,0)$ corresponds to the upper-left corner of the domain and thus to the center of the upper-left control-volume which is indexed by $(i,j)=(1,1)$, while $(i,j)=(n_y,n_x)$ are the indexes of the center of the bottom-right CV.
-\input{channel.tex}
+\input{LatexPlots/channel.tex}
 
 \bigskip
 
@@ -94,7 +88,7 @@ Consider the steady heat equation $\nabla\cdot(\rho\,u\,T)=\nabla\cdot(\Gamma\,\
 \end{align*}
 
 Where the east, west, north, and south faces are as shown in Figure \ref{fvm_grid_exact}. Pay attention not to mix the symbols $\mathrm{n}$, which refers to the north face, and $n$, which is the outward unit normal to the surface $\partial \mathrm{CV}$.
-\input{grid.tex}
+\input{LatexPlots/grid.tex}
 
 \bigskip
 
@@ -200,7 +194,7 @@ N &\equiv (i-1,j) \quad &\text{(north neighbor)}.
 \end{aligned}
 \]
 With this convention \(W\) and \(E\) are located along the streamwise ($x$) direction, \(S\) and \(N\) are along the spanwise ($y$) direction, and the origin \((x,y)=(0,0)\) corresponds to the center of the top–left CV at the intersection between channel inlet and upper wall. The convention is outlined in Figure \ref{indexing_sketch_split}.
-\input{structured_mesh}
+\input{LatexPlots/structured_mesh}
 
 \bigskip
 
@@ -307,7 +301,7 @@ The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_fiel
 \end{figure}
 
 \textbf{14. Iterative methods.} 
-In order to solve the system $AT=b$, instead of the Matlab backslash, we implement the Successive Over Relaxation method: starting for a suitable initial guess $T^0$, that respect the boundary conditions (for example a $T^0$ equal to $50^\circ C$ on the inlet and $100^\circ C$ on the two walls), the method monitor the values of relative iteration error $||T^k - T^{k-1}||_2\,/\,||T^{k-1}||_2 $ (Figure \ref{relative_error}), and the normalized residuals $||AT^k - b||_2\,/\,||diag(A)\,T^k||_2 $ (Figure \ref{residuals}), and stop when both are smaller than the tolerance $10^{-5}$. The SOR method is an algorithm that includes a relaxation parameter, $w$, to control its convergence. The choice of this parameter is critical: setting $w=1$ simplifies the algorithm to the standard Gauss-Seidel method. In contrast, setting w in the range $1<w<2$ (in this case, $w=1.5$) applies over-relaxation, a technique designed to accelerate convergence. The simulation using the Gauss-Seidel method took 35 iterations to meet the stopping criteria, while the over-relaxation method converged significantly faster, requiring only 23 iterations.
+In order to solve the system $AT=b$, instead of the Matlab backslash, we implement the Successive Over Relaxation method: starting from a suitable initial guess $T^0$, that respect the boundary conditions (for example a $T^0$ equal to $50^\circ C$ on the inlet and $100^\circ C$ on the two walls), the method monitors the values of relative iteration error $||T^k - T^{k-1}||_2\,/\,||T^{k-1}||_2 $ (Figure \ref{relative_error}), and the normalized residuals $||AT^k - b||_2\,/\,||diag(A)\,T^k||_2 $ (Figure \ref{residuals}), and stop when both are smaller than the tolerance $10^{-5}$. The SOR method is an algorithm that includes a relaxation parameter, $w$, to control its convergence. The choice of this parameter is critical: setting $w=1$ simplifies the algorithm to the standard Gauss-Seidel method. In contrast, setting w in the range $1<w<2$ (in this case, $w=1.5$) applies over-relaxation, a technique designed to accelerate convergence. The simulation using the Gauss-Seidel method took 35 iterations to meet the stopping criteria, while the over-relaxation method converged significantly faster, requiring only 23 iterations.
 
 \begin{figure}[H]
     \centering
@@ -323,6 +317,17 @@ In order to solve the system $AT=b$, instead of the Matlab backslash, we impleme
     \label{residuals}
 \end{figure}
 
-\textbf{15.} 
+\textbf{15. Nusselt Number computation}
+Consider the Nusselt Number defined as $Nu = \frac{\partial T / \partial n}{\Delta T / (2H)}$ where $\Delta T = T_{wall}\,-T_{mean}$. For laminar flows in plane channels, as shown by \cite{nusselt}, Nu(x) decreases in the entrance region but, far enough downstream of the inlet, approaches a constant value independent of the Peclet number, this behavior can be observed in Figure \ref{nusselt}. However, contrary to theoretical expectations, the figure also shows a sudden increase in $Nu(x)$ near the outlet. This unexpected trend a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality, there is still heat transfer occurring at the outlet, full development is just an approximation. This means that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the artificial Neumann condition. This unnatural distortion pollutes the solution upstream of the outlet and ultimately the Nusselt number which is calculated using the temperature gradient at the wall and the velocity-averaged mean fluid temperature. Because the solver is distorting the entire temperature field in the final cells, the calculated wall gradient is smaller than what it should be, leading to the artificial spike in the $\mathrm{Nu}$ value we observe.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/15.png} 
+    \caption{Nusselt Number along the lower wall.}
+    \label{nusselt}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{literature}
 
 \end{document}

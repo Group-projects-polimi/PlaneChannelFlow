@@ -60,8 +60,8 @@ a_P = a_E + a_W + a_N + a_S;
         A(n,n) = a_P;
         A(n,n+1) = -a_E;
         A(n,n-1) = -a_W;
-        A(n,n+nx) = -a_N;
-        A(n,n-nx) = -a_S;
+        A(n,n-nx) = -a_N;
+        A(n,n+nx) = -a_S;
     end
 end
 
@@ -92,8 +92,8 @@ for i = 2:ny-1
     A(n,n) = a_P;
     A(n,n+1) = 0;
     A(n,n-1) = -a_W;
-    A(n, n+nx) = -a_N;
-    A(n, n-nx) = -a_S;
+    A(n, n-nx) = -a_N;
+    A(n, n+nx) = -a_S;
     b(n) = 0;
 end
 
@@ -179,10 +179,10 @@ figure();
 plot(x_coords, T_2D(ceil(ny/2),:), 'r-o', 'LineWidth', 2);
 hold on;
 
-T_mean_weighted_values = zeros(size(x_coords, 2), 1);
-int_u_x = zeros(size(x_coords, 2), 1);
+T_mean_weighted_values = zeros(nx, 1);
+int_u_x = zeros(nx, 1);
 
-for j=1:size(x_coords, 2)
+for j=1:nx
     for i=1:ny
         if i==1 || i==ny
             T_mean_weighted_values(j) = T_mean_weighted_values(j)+ u_x(y_coords(i))*(T_2D(i,j))*dy/2;
@@ -278,3 +278,14 @@ legend('Normalized residual (w=1)', 'Normalized residual (w=1.5)', 'FontSize', 2
 
 disp(it1);
 disp(it2);
+
+%%% 15.
+q = -((T_2D(ny-1, :) - T_2D(ny, :)) / dy)';
+deltaT = T_wall - T_mean_weighted_values;
+Nu = q ./ deltaT * 2 * H;
+
+figure();
+plot(x_coords, Nu, 'LineWidth', 2);
+grid on;
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Nu', 'FontSize', 20);
