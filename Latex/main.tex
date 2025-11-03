@@ -42,7 +42,7 @@ right=1in]{geometry}
 {\Large \textbf{Numerical Flow Simulation  - Project 1}}\\
 \vspace{2mm}
 {\large Yanpeng Zhang, Stefano Bernasconi, Pietro Fumagalli, Francesco Derme}\\
-{\large 394469, 4141363, 414991, 394806}
+{\large 394469, 414363, 414991, 394806}
 \end{center}
 
 \vspace{2.5pt}
@@ -251,8 +251,7 @@ Note that corner CVs (e.g., \((i=1,j=1)\)) are assigned to walls to avoid bounda
 \bigskip
 
 \textbf{10. Physical Parameter Calculation.}
-Consider the following values for the fluid's physical properties: $\rho = 1\ \text{kg/m}^3$, $c_p = 10\ \text{J/(K $\cdot$ kg)}$, $k = 0.12\ \text{W/(m $\cdot$ K)}$, $\nu = 10^{-2}\ \text{m}^2/\text{s}$. Assume also that $L = 10\ \text{m}$, $H = 1\ \text{m}$, then $\mathrm{Pe} = \rho \cdot u_\text{mean} \cdot (2H) / \Gamma = 16.5$.
-
+Consider the following values for the fluid's physical properties: $\rho = 1\ \text{kg/m}^3$, $c_p = 10\ \text{J/(K $\cdot$ kg)}$, $k = 0.12\ \text{W/(m $\cdot$ K)}$, $\nu = 10^{-2}\ \text{m}^2/\text{s}$. Assume also that $L = 10\ \text{m}$, $H = 1\ \text{m}$, and that $\mathrm{Pe} = \rho \cdot u_\text{mean} \cdot (2H) / \Gamma = 16.5$. Then
 \begin{align*}
     &\Gamma = \frac{k}{c_p} = \frac{0.12}{10} = 0.012\ \frac{\text{kg}}{m \cdot \text{s}}, \\
     &u_{\text{mean}} = \frac{Pe \cdot \Gamma}{2H \cdot \rho} = \frac{16.5 \cdot 0.012}{2 \cdot 1 \cdot 1} = 0.099\ \text{m/s}, \\
@@ -273,6 +272,8 @@ Assume $T_\text{inlet} = 50^\circ C$ and $T_\text{wall} = 100^\circ C$. On a coa
     \label{temperature_field}
 \end{figure}
 
+\bigskip
+
 \textbf{12. Boundary conditions verification.}
 As demonstrated by the plots in Figure \ref{boundary_condition}, the solution respects all boundary conditions. Indeed we can see that: for the inlet the solution assumes the value $T_\text{wall} = 100^\circ C$ at the edges and the value $T_\text{inlet} = 50^\circ C$ for the internal nodes; at the outlet the functions $T(x,0.75)$ and $T(x,0.5)$ becomes flat when they reach $L=10\,m$, this means that their derivative with respect to x, at the end of the channel, is zero, as stated by the Neumann conditions; for the two horizontal walls is clear that the value remain constant to $T_\text{wall} = 100^\circ C$ both at $y=0$ and $y=H$.
 
@@ -282,6 +283,8 @@ As demonstrated by the plots in Figure \ref{boundary_condition}, the solution re
     \caption{Top left plot shows how our solution assumes the inlet boundary condition; bottom left and bottom right respectively show how our solution correctly assumes the boundary conditions for the lower and upper wall; top right plot shows streamwise temperature evolution of our solution evaluated at two different heights (y=0.75, y=0.5), indeed we observe a Neumann condition at x=L.}
     \label{boundary_condition}
 \end{figure}
+
+\bigskip
 
 \textbf{13. Temperature plots.} 
 The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted together with the entry length ($x_e = 2.449$). Note that the weighted mean temperature, defined as follows, is computed numerically, summing up all the contributions over the spanwise direction, in order to approximate the two integrals.
@@ -305,6 +308,8 @@ The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_fiel
     \label{cent_mean_temp}
 \end{figure}
 
+\bigskip
+
 \textbf{14. Iterative methods.} 
 In order to solve the system $AT=b$, instead of the Matlab backslash, we implement the Successive Over Relaxation method: starting from a suitable initial guess $T^0$, that respect the boundary conditions (for example a $T^0$ equal to $50^\circ C$ on the inlet and $100^\circ C$ on the two walls), the method monitors the values of relative iteration error $||T^k - T^{k-1}||_2\,/\,||T^{k-1}||_2 $ (Figure \ref{relative_error}), and the normalized residuals $||AT^k - b||_2\,/\,||diag(A)\,T^k||_2 $ (Figure \ref{residuals}), and stop when both are smaller than the tolerance $10^{-5}$. The SOR method is an algorithm that includes a relaxation parameter, $w$, to control its convergence. The choice of this parameter is critical: setting $w=1$ simplifies the algorithm to the standard Gauss-Seidel method. In contrast, setting w in the range $1<w<2$ (in this case, $w=1.5$) applies over-relaxation, a technique designed to accelerate convergence. The simulation using the Gauss-Seidel method took 35 iterations to meet the stopping criteria, while the over-relaxation method converged significantly faster, requiring only 23 iterations.
 
@@ -322,6 +327,8 @@ In order to solve the system $AT=b$, instead of the Matlab backslash, we impleme
     \label{residuals}
 \end{figure}
 
+\bigskip
+
 \textbf{15. Nusselt Number computation}
 Consider the Nusselt Number defined as 
 \begin{align}
@@ -329,9 +336,7 @@ Consider the Nusselt Number defined as
     \label{nusselt_formula}
 \end{align}
 where $\Delta T = T_{wall}\,-T_{mean}$ is the difference between the wall temperature and the velocity-averaged mean temperature $T_{mean}$ defined earlier. For laminar flows in plane channels, as shown by \cite{nusselt}, $\mathrm{Nu}(x)$ decreases in the entrance region, but far enough downstream of the inlet it approaches a constant value independent of the Péclet number. To remark that we're working in the case of uniform wall temperature, the Nusselt number is indicated as $\mathrm{Nu_T}(x)$. Numerically, we compute $\mathrm{Nu_T}(x)$ by approximating the velocity-averaged mean temperature (as in question 13) and the normal derivative of the temperature at the wall using a finite difference, the resulting $\mathrm{Nu_T}(x)$ along the lower wall can be observed in Figure \ref{nusselt}. It tends to a limit of 6.68, which we found to be reasonably close to the expected value of 7.54. 
-
 However, contrary to theoretical expectations, the trend also presents a sudden spike in Nusselt value near the outlet. This feature is a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality, there is still heat transfer occurring at the outlet, so such condition on the gradient is too restrictive, leading to a model incapable of capturing the essence of our phenomenon. 
-
 Numerically, what happens is that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the Neumann condition. This distortion then pollutes the entire temperature field upstream of the outlet, rendering the calculated wall gradient smaller than what is expected form experiments, and leading to the artificial spike in the value of $\mathrm{Nu}$ we observe.
 
 \begin{figure}[H]
@@ -341,8 +346,10 @@ Numerically, what happens is that the solver has to forcibly bend the temperatur
     \label{nusselt}
 \end{figure}
 
+\bigskip
+
 \textbf{16. Mesh refinement study.} 
-To ensure that the numerical solution is independent of the grid resolution, a mesh convergence study was performed. The simulation was run on four progressively refined meshes, as shown in Table \ref{mesh_refinement}. To evaluate the convergence between these cases, several key quantities of interest were computed and compared. These include the outlet temperature profile $T_o(y)$, the centerline temperature $T_c(x)$ and the mean temperature $T_{mean}(x)$ defined by \ref{T_mean_formula}, the entry length $x_e$ and the local Nusselt number $Nu(x)$, defined by \ref{nusselt_formula}, along the heated wall. The results can be seen in the plots below.
+To ensure that the numerical solution is independent of the grid resolution, a mesh convergence study was performed. The simulation was run on four progressively refined meshes, as shown in Table \ref{mesh_refinement}. To evaluate the convergence between these cases, several key quantities of interest were computed and compared. These include the  the entry length $x_e$, Table \ref{mesh_refinement}, the outlet temperature profile $T_o(y)$, Figure \ref{outlet_temperature_profile}, the centerline temperature $T_c(x)$, Figure \ref{centerline_temperature}, the velocity averaged mean temperature $T_{mean}(x)$ defined by \ref{T_mean_formula}, Figure \ref{mean_temperature_profile} and the local Nusselt number $Nu(x)$, defined by \ref{nusselt_formula}, along the heated wall, Figure \ref{nusselt_profile}. The results can be seen in the plots below:
 
 \begin{table}[H]
     \centering
@@ -363,33 +370,172 @@ To ensure that the numerical solution is independent of the grid resolution, a m
     \label{mesh_refinement}
 \end{table}
 
-\begin{figure}[H]
+\begin{itemize}
+    
+    \item This plot of the outlet temperature profile demonstrates successful grid convergence. The coarsest mesh, "Refinement level 1", is under-resolved and shows non-physical profile with a minimum temperature (around 99.965$^\circ$C) that is lower than the other cases. As the mesh is refined to "Refinement level 2" and "Refinement level 3", the solution curves become progressively smoother and shift upwards, indicating that they are approaching a stable solution.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_1.png} 
+        \caption{Temperature at the outlet.}
+        \label{outlet_temperature_profile}
+    \end{figure}
+
+    \item This plot of the centerline temperature profile also shows clear evidence of grid convergence. A noticeable, though small, gap exists between "Refinement level 1" and "Refinement level 2", particularly in the thermal entrance region. The most important finding is that the curves for Level 3 and Level 4 are visually identical across the entire domain. This indicates the solution has fully stabilized, and further mesh refinement does not alter the result.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_2.png} 
+        \caption{Centerline temperature profile.}
+        \label{centerline_temperature}
+    \end{figure}
+
+    \item The plot for the velocity-averaged mean temperature provides further strong confirmation of grid convergence. "Refinement level 1" is slightly under-resolved, predicting a slower temperature rise in the entrance region compared to the finer grids. The solution progressively improves with "Refinement level 2", which is closer to the final solution. Also in this plot can be appreciated an excellent agreement between "Refinement level 3" and "Refinement level 4". These two curves are visually indistinguishable over the entire length of the domain, demonstrating that the solution has fully stabilized.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_3.png} 
+        \caption{Velocity averaged mean temperature profile.}
+        \label{mean_temperature_profile}
+    \end{figure}
+
+    \item The plot of the local Nusselt number provides excellent evidence of grid convergence. "Refinement level 1" is significantly under-resolved, predicting a fully developed Nu value of only 6.7, which is far from the theoretical prediction. As the mesh is refined, the solution curves for Level 2, Level 3, and Level 4 clearly and asymptotically converge towards the theoretical value of 7.54, predicted in \cite{nusselt}. The zoomed-in view shows that the change between Level 3 and Level 4 is very small, confirming the solution has stabilized. It is also worth noting that the small up-tick in Nu near the outlet) is present at all refinement levels. This indicates it is not a grid resolution error but rather a numerical artifact, stemming from the influence of the outlet boundary condition.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_4.png} 
+        \caption{The Nusselt number profile.}
+        \label{nusselt_profile}
+    \end{figure}
+\end{itemize}
+
+\bigskip
+
+\textbf{17. QUICK discretization.} To evaluate the impact of the numerical discretization scheme on the solution accuracy, the simulation is re-run using the QUICK scheme for the convective term, replacing the First-Order Upwind scheme used previously. QUICK is a higher-order scheme designed to reduce the numerical diffusion inherent in first-order methods like UD. After the discretization with QUICK the algebraic equation is as follows:
+
+\[
+a_P\,T_P=a_E\,T_E+a_W\,T_W+a_N\,T_N+a_S\,T_S+b_P
+\]
+where
+\begin{alignat*}{2}
+&a_{WW}=-\max(0,\frac{F_e}{8}) \qquad &&a_{EE}=-\max(0,-\frac{F_e}{8}),\\
+&a_E = D_e -\max(0,\frac{3F_e}{8})+\max(0,\frac{-6F_e}{8})-\max(0,-\frac{F_w}{8}), \qquad &&a_N = D_n,\\
+&a_W = D_w +\max(0,\frac{6F_w}{8})+\max(0,\frac{F_e}{8})-\max(0,-\frac{3F_w}{8}), \qquad &&a_S = D_s,\\
+&a_P = a_E+a_W+a_N+a_S, \qquad &&b_{i,j} =0
+\end{alignat*}
+
+The solution is computed on the same four progressively refined meshes to compare the convergence behavior of both schemes. The entrance length $x_e$ is used as the primary metric for this comparison, as shown in the Tables below.
+
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_1.png} 
-    \caption{}
-    \label{}
-\end{figure}
+    \begin{minipage}{.45\textwidth}
+        \centering
+        \begin{tabular}{|c|c|c|} 
+            \hline
+            $\mathbf{n_x}$ & $\mathbf{n_y}$ & \textbf{Entry Length (UD)} \\ 
+            \hline
+            50 & 5 & 2.449 \\ 
+            \hline
+            100 & 11 & 2.3232 \\ 
+            \hline
+            200 & 21 & 2.2111 \\ 
+            \hline
+            400 & 41 & 2.1805 \\
+            \hline
+        \end{tabular}
+    \caption{The entry length computed with the UD method.}
+    \label{entry_lenght_table_ud}
+    \end{minipage}
+    \hspace{0.05\textwidth}
+    \begin{minipage}{.45\textwidth}
+        \centering
+        \begin{tabular}{|c|c|c|} 
+            \hline
+            $\mathbf{n_x}$ & $\mathbf{n_y}$ & \textbf{Entry Length (QUICK)} \\ 
+            \hline
+            50 & 5 & 2.449 \\ 
+            \hline
+            100 & 11 & 2.2222 \\ 
+            \hline
+            200 & 21 & 2.1608 \\ 
+            \hline
+            400 & 41 & 2.1554 \\
+            \hline
+        \end{tabular}
+    \caption{The entry length computed with the QUICK method.}
+    \label{entry_lenght_table_quick}
+    \end{minipage}
+\end{table}
+
+The plot in Figure \ref{entry_length_comparison} shows the computed $x_e$ for both schemes, and illustrates the superior convergence rate of QUICK. Both methods start with a similarly inaccurate entry length of 2.45 on the coarsest mesh (black dot). However, the "Upwind" scheme's solution converges very slowly and gradually, with significant gaps remaining even between the finest meshes (blue and red dots), indicating it has not yet reached a grid-independent solution. In contrast, the "Quick" scheme converges much more rapidly; after a large jump from Mesh 1 (black) to Mesh 2 (green), the values for Mesh 3 (blue) and Mesh 4 (red) are extremely close to each other. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_2.png} 
-    \caption{}
-    \label{}
+    \includegraphics[width=0.5\textwidth]{Latex/MATLABfigures/17_1.png} 
+    \caption{The entry length comparison between UD and QUICK, as shown in the Tables \ref{entry_lenght_table_ud}, \ref{entry_lenght_table_quick}.}
+    \label{entry_length_comparison}
 \end{figure}
+
+The plot in Figure \ref{relative_entry_length_comparison}, which displays the relative error with respect to the finest mesh solution (red dot), provides a quantitative confirmation of QUICK's higher-order accuracy. The "Upwind" scheme's error decreases slowly, starting high at 12.5\% (black dot), reducing to 6.5\% (green dot), and remaining over 1\% even on Mesh 3 (blue dot). In contrast, the "Quick" scheme's error drops dramatically: while starting at a similar 13.5\%, its error on Mesh 2 (green dot)is already less than half that of the Upwind scheme, and it becomes nearly zero on Mesh 3 (blue dot). This rapid error reduction proves the superior convergence rate of the QUICK scheme.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_3.png} 
-    \caption{}
-    \label{}
+    \includegraphics[width=0.5\textwidth]{Latex/MATLABfigures/17_2.png} 
+    \caption{Relative variation for $x_e$ with respect to the finest mesh, for UD and QUICK.}
+    \label{relative_entry_length_comparison}
 \end{figure}
+
+\bigskip
+
+\textbf{18. Independent $n_x$ and $n_y$ refinement} 
+Previous simulations used meshes with approximately square control volumes to perform a standard grid convergence study. While this approach is robust, it may not be the most computationally efficient. It is possible that the solution is more sensitive to resolution in one direction (e.g., the transverse $y$-direction, where gradients are steep) than the other (e.g., the axial $x$-direction). To test this, two separate series of simulations are conducted and the entrance length will be used as the key scalar metric for comparison.
+
+\begin{enumerate}
+
+    \item Fixed streamwise Resolution ($n_x=400$): The transverse resolution is varied using meshes of ($n_x, n_y$) = (400, 5), (400, 11), and (400, 21), showing the solution's sensitivity to $\Delta y$.
+
+    \item Fixed spanwise Resolution ($n_y=41$): The axial resolution is varied using meshes of ($n_x, n_y$) = (100, 41), (200, 41), and (400, 41), showing the solution's sensitivity to $\Delta x$.
+
+\end{enumerate}
+
+The plot in Figure \ref{axial_refinement} compares the effect of streamwise and spanwise refinement on the minimum Nusselt number. The orange line is perfectly horizontal at a value of approximately $Nu \approx 7.57$, demonstrating that the solution is completely insensitive to the axial mesh resolution $\Delta x$ once the transverse resolution is sufficient (here $n_y=41$). In contrast, the blue line shows a very strong dependence on the transverse resolution. As $\Delta y$ is refined (moving left on the plot), the computed minimum $Nu$ value clearly converges upwards from a highly inaccurate $\approx 6.7$ and progressively approaches the theoretical value of 7.54. This analysis proves that the transverse resolution $\Delta y$ is the single most critical factor for accuracy, and that a high-aspect-ratio mesh (e.g., $n_x=100, n_y=41$) is more efficient than a 'square' mesh for this problem.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_4.png} 
-    \caption{}
-    \label{}
-\end{figure}
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/18.png} 
+    \caption{Minimum Nusselt number for varying $n_x$ and $n_y$.}
+    \label{axial_refinement}
+\end{figure} 
+
+\textbf{19. Changing the Péclet Number.}
+The plots in Figures \ref{peclet_50} and \ref{peclet_100} show a qualitative comparison of the full two-dimensional temperature fields, $T(x,y)$, at two different Péclet numbers, $Pe$. The two plots clearly visualize the physical meaning of the Péclet number. The first plot (Figure \ref{peclet_50}), representing $Pe=50$, shows a case where physical diffusion is relatively strong: as a result, heat from the hot walls diffuses into the central core fluid much more rapidly, causing the blue and cold region to be shorter and wider, smearing the profile and causing it to dissipate by $x \approx 5$ m. In contrast, the first plot (Figure \ref{peclet_100}), representing $Pe=100$, shows a flow dominated by advection. The flow's stiffness resists the diffusive effects from the wall, advecting the cold inlet temperature much further downstream. This results in a  longer cold core. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Latex/MATLABfigures/19_1.png} 
+    \caption{Temperature field with $P_e=50$}
+    \label{peclet_50}
+\end{figure} 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Latex/MATLABfigures/19_2.png} 
+    \caption{Temperature field with $P_e=100$}
+    \label{peclet_100}
+\end{figure} 
+
+\bigskip
+
+\textbf{20. Neumann boundary condition at the walls.}
+We now want to impose a Neumann condition \(k \cdot \partial T/\partial x = q_\text{wall}\) on the lower (\(i=n_y\), \(1 \leq j \leq n_x\)) and upper (\(i = 1\), \(1 \leq j \leq n_x\)) wall CVs.
+
+leads to $a_E = 0$. Numerically
+\begin{align*}
+&A(n, n) = a_P, \quad A(n, n+1) = 0, \quad A(n, n-1) = -a_W, \quad A(n, n+n_x) = -a_N, \\
+&A(n, n-n_x) = -a_S, \quad b(n) = 0, \quad \text{where } n = (i-1)n_x + n_x
+\end{align*}
+
+\bigskip
 
 \bibliographystyle{plain}
 \bibliography{literature}
