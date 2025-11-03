@@ -209,7 +209,7 @@ ylabel('Temperature (°C)', 'FontSize', 20);
 grid on;
 
 x_entry_index = 0;
-for i=1:size(x_coords, 2)
+for i=1:nx
     if T_2D(ceil(ny/2),i) >= 0.9 * T_wall
         x_entry_index = i;
         break
@@ -309,20 +309,105 @@ entry_lengths = (4);
 nus = zeros(4, 400);
 
 for i=1:4
+    dx = L/(nx_vec(i)-1);
+    dy = H/(ny_vec(i)-1);
+
     [A, b, T_2D] = compute_sol(nx_vec(i), ny_vec(i), L, H, Gamma, rho, u_x, T_in, T_wall);
     x_coords_vec(i, 1:nx_vec(i)) = linspace(0, L, nx_vec(i));   
     y_coords_vec(i, 1:ny_vec(i)) = linspace(0, H, ny_vec(i));
     outlet_temperatures(i, 1:ny_vec(i)) = T_2D(:, nx_vec(i));
+    centerline_temperatures(i, 1:nx_vec(i)) = T_2D(ceil(ny_vec(i)/2), :);
+
+    int_u_x = zeros(nx_vec(i), 1);
+    
+    for j=1:nx_vec(i)
+        for k=1:ny_vec(i)
+            if k==1 || k==ny_vec(i)
+                vam_temperatures(i, j) = vam_temperatures(i, j)+ u_x(y_coords_vec(i, k))*(T_2D(k,j))*dy/2;
+                int_u_x(j)=int_u_x(j)+u_x(y_coords_vec(i, k))*dy/2;
+            else
+                vam_temperatures(i, j) = vam_temperatures(i, j) + u_x(y_coords_vec(i, k))*(T_2D(k,j))*dy;
+                int_u_x(j)=int_u_x(j)+u_x(y_coords_vec(i, k))*dy;
+            end
+        end
+
+        vam_temperatures(i, j) = vam_temperatures(i, j) / int_u_x(j);
+    end
+
+    q = -((T_2D(ny_vec(i)-1, :) - T_2D(ny_vec(i), :)) / dy);
+    deltaT = T_wall - vam_temperatures(i,1:nx_vec(i));
+    nus(i, 1:nx_vec(i)) = q ./ deltaT * 2 * H;
+
+    x_entry_index = 0;
+    for k=1:nx_vec(i)
+        if T_2D(ceil(ny_vec(i)/2),k) >= 0.9 * T_wall
+            x_entry_index = k;
+            break
+        end
+    end
+
+    disp('Entry length')
+    disp(x_coords_vec(i, x_entry_index))
 end
 
 figure();
-subplot(2, 2, 1);
 for i=1:4
-    plot(y_coords_vec(i, 1:ny_vec(i)), outlet_temperatures(i,1:ny_vec(i)), 'LineWidth', 2);
+    plot(y_coords_vec(i, 1:ny_vec(i)), outlet_temperatures(i,1:ny_vec(i)), 'LineWidth', 1);
     hold on;
 end
 
 grid on;
-xlabel('y (m)');
-ylabel('Temperature (°C)');
-title('Outlet');
+xlabel('y (m)', 'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
+%title('Outlet');
+legend('Refinement level 1', 'Refinement level 2', 'Refinement level 3', 'Refinement level 4', 'FontSize', 20)
+
+figure();
+for i=1:4
+    plot(x_coords_vec(i, 1:nx_vec(i)), centerline_temperatures(i,1:nx_vec(i)), 'LineWidth', 1);
+    hold on;
+end
+
+grid on;
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
+%title('Centerline');
+legend('Refinement level 1', 'Refinement level 2', 'Refinement level 3', 'Refinement level 4', 'FontSize', 20)
+
+figure();
+for i=1:4
+    plot(x_coords_vec(i, 1:nx_vec(i)), vam_temperatures(i,1:nx_vec(i)), 'LineWidth', 1);
+    hold on;
+end
+
+grid on;
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
+%title('Velocity-averaged');
+legend('Refinement level 1', 'Refinement level 2', 'Refinement level 3', 'Refinement level 4', 'FontSize', 20)
+
+figure();
+for i=1:4
+    plot(x_coords_vec(i, 1:nx_vec(i)), nus(i,1:nx_vec(i)), 'LineWidth', 1);
+    hold on;
+end
+
+grid on;
+xlabel('x (m)', 'FontSize', 20);
+ylabel('Temperature (°C)', 'FontSize', 20);
+%title('Nu');
+ylim([0, 50])
+legend('Refinement level 1', 'Refinement level 2', 'Refinement level 3', 'Refinement level 4', 'FontSize', 20)
+
+ax_inset = axes('Position', [0.545, 0.3, 0.35, 0.25]);
+for i=1:4
+    plot(x_coords_vec(i, nx_vec(i)-2*2^i:nx_vec(i)), nus(i,nx_vec(i)-2*2^i:nx_vec(i)), 'LineWidth', 1);
+    hold on;
+end
+
+grid on;
+xlim([9.5, 10])
+title(ax_inset, 'Zoomed-in view');
+box on;
+
+%%% 17.

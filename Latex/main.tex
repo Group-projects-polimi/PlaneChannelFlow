@@ -42,7 +42,7 @@ right=1in]{geometry}
 {\Large \textbf{Numerical Flow Simulation  - Project 1}}\\
 \vspace{2mm}
 {\large Yanpeng Zhang, Stefano Bernasconi, Pietro Fumagalli, Francesco Derme}\\
-{\large ?, 4141363, 414991, 394806}
+{\large 394469, 4141363, 414991, 394806}
 \end{center}
 
 \vspace{2.5pt}
@@ -284,7 +284,12 @@ As demonstrated by the plots in Figure \ref{boundary_condition}, the solution re
 \end{figure}
 
 \textbf{13. Temperature plots.} 
-The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted together with the entry length ($x_e = 2.449$). Note that the weighted mean temperature, defined as $T_{mean}(x) = \dfrac{\int_{0}^{H}u_x(y)T(x,y)dy}{\int_{0}^{H}u_x(y)dy}$, is computed numerically, summing up all the contributions over the spanwise direction, in order to approximate the two integrals.
+The 2D plot of the solution $T(x,y)$ can be seen in Figure \ref{temperature_field}. The outlet temperature is shown in Figure \ref{outlet_temperature}, while in Figure \ref{cent_mean_temp} the centerline temperature and the weighted mean temperature are plotted together with the entry length ($x_e = 2.449$). Note that the weighted mean temperature, defined as follows, is computed numerically, summing up all the contributions over the spanwise direction, in order to approximate the two integrals.
+
+\begin{align}
+    T_{mean}(x) = \dfrac{\int_{0}^{H}u_x(y)T(x,y)dy}{\int_{0}^{H}u_x(y)dy}
+    \label{T_mean_formula}
+\end{align}
 
 \begin{figure}[H]
     \centering
@@ -319,12 +324,15 @@ In order to solve the system $AT=b$, instead of the Matlab backslash, we impleme
 
 \textbf{15. Nusselt Number computation}
 Consider the Nusselt Number defined as 
-\[Nu = \frac{\partial T / \partial n}{\Delta T / (2H)} \text{ with }  \Delta T = T_{wall}\,-T_{mean}\] 
-Where $\Delta T$ is the difference between the wall temperature and the velocity-averaged mean temperature $T_{mean}$ defined earlier. For laminar flows in plane channels, as shown by \cite{nusselt}, $\mathrm{Nu}(x)$ decreases in the entrance region, but far enough downstream of the inlet it approaches a constant value independent of the Péclet number. To remark that we're working in the case of uniform wall temperature, the Nusselt number is indicated as $\mathrm{Nu_T}(x)$. Numerically, we compute $\mathrm{Nu_T}(x)$ by approximating the velocity-averaged mean temperature (as in question 13) and the normal derivative of the temperature at the wall using a finite difference, the resulting $\mathrm{Nu_T}(x)$ along the lower wall can be observed in Figure \ref{nusselt}. It tends to a limit of 6.68, which we found to be reasonably close to the expected value of 7.54. 
+\begin{align}
+    \mathrm{Nu} = \frac{\partial T / \partial n}{\Delta T / (2H)}
+    \label{nusselt_formula}
+\end{align}
+where $\Delta T = T_{wall}\,-T_{mean}$ is the difference between the wall temperature and the velocity-averaged mean temperature $T_{mean}$ defined earlier. For laminar flows in plane channels, as shown by \cite{nusselt}, $\mathrm{Nu}(x)$ decreases in the entrance region, but far enough downstream of the inlet it approaches a constant value independent of the Péclet number. To remark that we're working in the case of uniform wall temperature, the Nusselt number is indicated as $\mathrm{Nu_T}(x)$. Numerically, we compute $\mathrm{Nu_T}(x)$ by approximating the velocity-averaged mean temperature (as in question 13) and the normal derivative of the temperature at the wall using a finite difference, the resulting $\mathrm{Nu_T}(x)$ along the lower wall can be observed in Figure \ref{nusselt}. It tends to a limit of 6.68, which we found to be reasonably close to the expected value of 7.54. 
 
-However, contrary to theoretical expectations, the trend also presents a sudden spike in Nusselt value near the outlet. This feature is a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality there is still heat transfer occurring at the outlet, meaning that such condition on the gradients is too restrictive. As a consequence. this produces a model incapable of capturing the essence of our phenomenon. 
+However, contrary to theoretical expectations, the trend also presents a sudden spike in Nusselt value near the outlet. This feature is a numerical artifact, not a physical phenomenon, and is caused by a conflict between the physics of the flow and the Neumann boundary condition. Indeed, a Neumann null outlet condition means that the temperature profile is no longer changing in the direction of the flow. Apparently, this is pacific since it's also what we expect from the definition of \textit{fully developed} flow. In reality, there is still heat transfer occurring at the outlet, so such condition on the gradient is too restrictive, leading to a model incapable of capturing the essence of our phenomenon. 
 
-This means that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the Neumann condition. This distortion then pollutes the entire temperature field upstream of the outlet rendering the calculated wall gradient smaller than what is expected form experiments, leading to the artificial spike in the value of $\mathrm{Nu}$ we observe.
+Numerically, what happens is that the solver has to forcibly bend the temperature profile in the last few cells of the mesh to satisfy the Neumann condition. This distortion then pollutes the entire temperature field upstream of the outlet, rendering the calculated wall gradient smaller than what is expected form experiments, and leading to the artificial spike in the value of $\mathrm{Nu}$ we observe.
 
 \begin{figure}[H]
     \centering
@@ -333,7 +341,55 @@ This means that the solver has to forcibly bend the temperature profile in the l
     \label{nusselt}
 \end{figure}
 
-\textbf{16.}
+\textbf{16. Mesh refinement study.} 
+To ensure that the numerical solution is independent of the grid resolution, a mesh convergence study was performed. The simulation was run on four progressively refined meshes, as shown in Table \ref{mesh_refinement}. To evaluate the convergence between these cases, several key quantities of interest were computed and compared. These include the outlet temperature profile $T_o(y)$, the centerline temperature $T_c(x)$ and the mean temperature $T_{mean}(x)$ defined by \ref{T_mean_formula}, the entry length $x_e$ and the local Nusselt number $Nu(x)$, defined by \ref{nusselt_formula}, along the heated wall. The results can be seen in the plots below.
+
+\begin{table}[H]
+    \centering
+        \begin{tabular}{|c|c|c|} 
+        \hline
+        $\mathbf{n_x}$ & $\mathbf{n_y}$ & \textbf{Entry Length} \\ 
+        \hline
+        50 & 5 & 2.449 \\ 
+        \hline
+        100 & 11 & 2.3232 \\ 
+        \hline
+        200 & 21 & 2.2111 \\ 
+        \hline
+        400 & 41 & 2.1805 \\
+        \hline
+        \end{tabular}
+    \caption{The Mesh refinement and the corresponding entry length values}
+    \label{mesh_refinement}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_1.png} 
+    \caption{}
+    \label{}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_2.png} 
+    \caption{}
+    \label{}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_3.png} 
+    \caption{}
+    \label{}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_4.png} 
+    \caption{}
+    \label{}
+\end{figure}
 
 \bibliographystyle{plain}
 \bibliography{literature}
