@@ -366,7 +366,7 @@ To ensure that the numerical solution is independent of the grid resolution, a m
         400 & 41 & 2.1805 \\
         \hline
         \end{tabular}
-    \caption{The Mesh refinement and the corresponding entry length values}
+    \caption{The Mesh refinement and the corresponding entry length values.}
     \label{mesh_refinement}
 \end{table}
 
@@ -385,7 +385,7 @@ To ensure that the numerical solution is independent of the grid resolution, a m
     
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_2.png} 
+        \includegraphics[width=0.8\textwidth]{Latex/MATLABfigures/16_2.png} 
         \caption{Centerline temperature profile.}
         \label{centerline_temperature}
     \end{figure}
@@ -394,7 +394,7 @@ To ensure that the numerical solution is independent of the grid resolution, a m
     
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_3.png} 
+        \includegraphics[width=0.8\textwidth]{Latex/MATLABfigures/16_3.png} 
         \caption{Velocity averaged mean temperature profile.}
         \label{mean_temperature_profile}
     \end{figure}
@@ -403,7 +403,7 @@ To ensure that the numerical solution is independent of the grid resolution, a m
     
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/16_4.png} 
+        \includegraphics[width=0.8\textwidth]{Latex/MATLABfigures/16_4.png} 
         \caption{The Nusselt number profile.}
         \label{nusselt_profile}
     \end{figure}
@@ -471,7 +471,7 @@ The plot in Figure \ref{entry_length_comparison} shows the computed $x_e$ for bo
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Latex/MATLABfigures/17_1.png} 
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/17_1.png} 
     \caption{The entry length comparison between UD and QUICK, as shown in the Tables \ref{entry_lenght_table_ud}, \ref{entry_lenght_table_quick}.}
     \label{entry_length_comparison}
 \end{figure}
@@ -480,7 +480,7 @@ The plot in Figure \ref{relative_entry_length_comparison}, which displays the re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Latex/MATLABfigures/17_2.png} 
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/17_2.png} 
     \caption{Relative variation for $x_e$ with respect to the finest mesh, for UD and QUICK.}
     \label{relative_entry_length_comparison}
 \end{figure}
@@ -502,13 +502,13 @@ The plot in Figure \ref{axial_refinement} compares the effect of streamwise and 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/18.png} 
+    \includegraphics[width=0.7\textwidth]{Latex/MATLABfigures/18.png} 
     \caption{Minimum Nusselt number for varying $n_x$ and $n_y$.}
     \label{axial_refinement}
 \end{figure} 
 
 \textbf{19. Changing the Péclet Number.}
-The plots in Figures \ref{peclet_50} and \ref{peclet_100} show a qualitative comparison of the full two-dimensional temperature fields, $T(x,y)$, at two different Péclet numbers, $Pe$. The two plots clearly visualize the physical meaning of the Péclet number. The first plot (Figure \ref{peclet_50}), representing $Pe=50$, shows a case where physical diffusion is relatively strong: as a result, heat from the hot walls diffuses into the central core fluid much more rapidly, causing the blue and cold region to be shorter and wider, smearing the profile and causing it to dissipate by $x \approx 5$ m. In contrast, the first plot (Figure \ref{peclet_100}), representing $Pe=100$, shows a flow dominated by advection. The flow's stiffness resists the diffusive effects from the wall, advecting the cold inlet temperature much further downstream. This results in a  longer cold core. 
+The plots in Figures \ref{peclet_50} and \ref{peclet_100} show a qualitative comparison of the full two-dimensional temperature fields, $T(x,y)$, at two different Péclet numbers, $Pe$. The two plots clearly visualize the physical meaning of the Péclet number. The first plot (Figure \ref{peclet_50}), representing $Pe=50$, shows a case where physical diffusion is relatively strong: as a result, heat from the hot walls diffuses into the central core fluid much more rapidly, causing the blue and cold region to be shorter and wider, smearing the profile and causing it to dissipate by $x \approx 5$ m. In contrast, the second plot (Figure \ref{peclet_100}), representing $Pe=100$, shows a flow dominated by advection. The flow's stiffness resists the diffusive effects from the wall, advecting the cold inlet temperature much further downstream. This results in a  longer cold core. 
 
 \begin{figure}[H]
     \centering
@@ -527,15 +527,99 @@ The plots in Figures \ref{peclet_50} and \ref{peclet_100} show a qualitative com
 \bigskip
 
 \textbf{20. Neumann boundary condition at the walls.}
-We now want to impose a Neumann condition \(k \cdot \partial T/\partial x = q_\text{wall}\) on the lower (\(i=n_y\), \(1 \leq j \leq n_x\)) and upper (\(i = 1\), \(1 \leq j \leq n_x\)) wall CVs.
+We now want to impose a Neumann condition \(k \cdot \partial T/\partial x = q_\text{wall}\) on the lower (\(i=n_y\), \(1 \leq j \leq n_x\)) and upper (\(i = 1\), \(1 \leq j \leq n_x\)) wall CVs. This leads to:
 
-leads to $a_E = 0$. Numerically
-\begin{align*}
-&A(n, n) = a_P, \quad A(n, n+1) = 0, \quad A(n, n-1) = -a_W, \quad A(n, n+n_x) = -a_N, \\
-&A(n, n-n_x) = -a_S, \quad b(n) = 0, \quad \text{where } n = (i-1)n_x + n_x
-\end{align*}
+\begin{itemize}
+
+    \item Uppermost CVs (Non-Corner) (for $i=1, 1 < j < n_x$)
+    \begin{align*}
+    &a_N = 0 \\
+    &a_P = a_E + a_W + a_S \\
+    &b(n) = \frac{q_{wall}}{c_p} \Delta x
+    \end{align*}
+    
+    \item Lowermost CVs (Non-Corner) (for $i=n_y, 1 < j < n_x$)
+    \begin{align*}
+    &a_N = 0 \\
+    &a_P = a_E + a_W + a_N \\
+    &b(n) = \frac{q_{wall}}{c_p} \Delta x
+    \end{align*}
+
+    \item Upper-Left Corner ($i=1, j=1$): This cell is an inlet, so the Dirichlet condition $T_P = T_{\text{in}}$ overrides the Neumann wall condition. The equation is simply $T_P = T_{\text{in}}$.
+    
+    \item Lower-Left Corner ($i=n_y, j=1$): This cell is also an inlet, and the Dirichlet condition $T_P = T_{\text{in}}$ overrides the Neumann wall condition. The equation is $T_P = T_{\text{in}}$.
+
+    \item Upper-Right Corner ($i=1, j=n_x$): This cell combines the outlet and upper wall conditions.
+    \begin{align*}
+    &a_E = 0 \\
+    &a_N = 0 \\
+    &a_P = a_W + a_S \\
+    &b(n) = \frac{q_{wall}}{c_p} \Delta x
+    \end{align*}
+    
+    \item Lower-Right Corner ($i=n_y, j=n_x$): This cell combines the outlet and lower wall conditions.
+    \begin{align*}
+    &a_E = 0 \\
+    &a_S = 0 \\
+    &a_P = a_W + a_N \\
+    &b(n) = \frac{q_{wall}}{c_p} \Delta x
+    \end{align*}
+
+\end{itemize}
+
+The plot in Figure \ref{wall_neumann} shows that the temperature field for the constant heat flux ($q_{\text{wall}} = 10\,W/m^2$) case looks physically reasonable. The simulation correctly captures the uniform inlet temperature at $x=0$. As the fluid flows down the channel, heat is added from both the upper and lower walls, causing the entire fluid to heat up continuously.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Latex/MATLABfigures/20_1.png} 
+    \caption{Temperature field with Neumann conditions at the wall.}
+    \label{wall_neumann}
+\end{figure} 
+
+The plots in Figure \ref{boundary_wall_neumann} provide an a posteriori check that the boundary conditions have been correctly implemented. The Inlet plot confirms that the Dirichlet inlet condition is correctly enforced, showing a constant temperature across the entire $y$-direction at $x=0$. The two plots Wall (y = 0) and Wall (y = H) shows the computed wall temperatures, they correctly start at $50^\circ C$ at $x=0$, matching the inlet temperature, and then show a continuous, near-linear rise as the fluid is heated. This behavior is the correct physical consequence of a constant positive heat flux, $q_{wall} > 0$.  The outlet plot shows shows temperature evolution of the solution evaluated at the last two CVs, we observe a Neumann condition at x=L since the solution is not changing much in the x direction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Latex/MATLABfigures/20_2.png} 
+    \caption{Top left plot shows how our solution assumes the inlet boundary condition; bottom left and bottom right respectively show how our solution correctly assumes the boundary conditions for the lower and upper wall; top right plot shows temperature evolution of the solution evaluated at the last two CVs.}
+    \label{boundary_wall_neumann}
+\end{figure} 
+
+The plot in Figure \ref{nusselt_wall_neumann} exhibits a very high Nusselt number near the inlet x=0 which then decays rapidly as the thermal boundary layer develops. Note that on the first cell $Nu = 0$, this is because the Dirichlet boundary condition are imposed also on the corners of the inlet, and this leads to a null denominator in Formula \ref{nusselt_formula}. Beyond the entrance section, the flow becomes thermally fully-developed, and the Nusselt number correctly settles at a constant value, which for this case is $Nu \approx 6.9$. The small, sudden drop in $Nu$ observed at the very end of the channel is a numerical artifact, and is caused by the approximate nature of the numerical boundary condition imposed at the finite domain outlet, which can slightly influence the solution just upstream of the boundary. Note that in this case $Nu$ experience a drop, while when constant wall condition were imposed $Nu$ slightly increase at the end of the domain, as shown in Figure \ref{nusselt}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/20_3.png} 
+    \caption{$Nu_q(x)$ along the lower wall.}
+    \label{nusselt_wall_neumann}
+\end{figure} 
 
 \bigskip
+
+\textbf{21. Global conservation of thermal energy.}
+After obtaining a converged solution, we check if the numerical model globally conserves thermal energy. This requires a systematic accounting of all heat fluxes crossing the boundaries of the computational domain. The net sum of these fluxes should ideally be zero, confirming that energy is neither created nor destroyed, in accordance with the First Law of Thermodynamics.
+
+\begin{table}[H]
+    \centering
+        \begin{tabular}{|c|c|c|c|c|} 
+        \hline
+        & \textbf{Inlet} & \textbf{Outlet} & \textbf{Wall (y=0)} & \textbf{Wall (y=H)} \\ 
+        \hline
+        \textbf{Diffusive flux} & 0 & 0 & 0 & 0 \\ 
+        \hline
+        \textbf{Convective flux} &0 & 0 & 0 & 0 \\ 
+        \hline
+        \end{tabular}
+    \caption{Values of the diffusive and convective thermal flux at the boundaries.}
+    \label{boundary_thermal_conservation}
+\end{table}
+
+The global thermal energy balance, considering all the contributions, is $.$. This shows that in the simulation the total energy is conserved.
+
+\bigskip
+
+\textbf{22. Non uniform wall boundary conditions.}
+que
 
 \bibliographystyle{plain}
 \bibliography{literature}
