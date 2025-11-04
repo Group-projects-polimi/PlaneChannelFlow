@@ -48,6 +48,7 @@ right=1in]{geometry}
 \vspace{2.5pt}
 \paragraph{Setup.}
 Consider a fluid flowing through a plane channel between horizontal walls located in $y = 0$ and $y = H$ as shown in Figure \ref{channel_domain}. The temperature field $T(x, y)$ is the solution of the steady heat equation, $\nabla\cdot(\rho\,u\,T)=\nabla\cdot(\Gamma\,\nabla T)$. Here, the density $\rho$, the velocity field $u$=$[u_x , u_y]^T$ and the thermal properties are known ($\Gamma = k/c_p$ is the ratio of thermal conductivity $k$ to specific heat capacity $c_p$). Assume that $T$ is a passive scalar, i.e. the fluid properties and the velocity field are independent of temperature. The two-dimensional numerical domain is a simple rectangle such that $0 \leq x\leq L$ and $0 \leq y \leq H$. Also, consider a structured mesh with $n_x$ cells in the $x$ direction and $n_y$ cells in the $y$ direction, then $\Delta x = L/(n_x-1)$, $\Delta y = H/(n_y-1)$. Here, the denominator is $n_x - 1$ instead of $n_x$ because the boundary control volumes, as will be explained later, are cut in half so that their nodes sit exactly on the inlet, outlet or the walls. Indices $i, j$ range from 1 to $n_y, n_x$ respectively. By convention, the origin $(x,y)=(0,0)$ corresponds to the upper-left corner of the domain and thus to the center of the upper-left control-volume which is indexed by $(i,j)=(1,1)$, while $(i,j)=(n_y,n_x)$ are the indexes of the center of the bottom-right CV.
+
 \input{LatexPlots/channel.tex}
 
 \bigskip
@@ -605,21 +606,47 @@ After obtaining a converged solution, we check if the numerical model globally c
         \hline
         & \textbf{Inlet} & \textbf{Outlet} & \textbf{Wall (y=0)} & \textbf{Wall (y=H)} \\ 
         \hline
-        \textbf{Diffusive flux} & 0 & 0 & 0 & 0 \\ 
+        \textbf{Diffusive flux} & -0.3619 W & -0.1986 W & 9.6817 W & 9.6817 W \\ 
         \hline
-        \textbf{Convective flux} &0 & 0 & 0 & 0 \\ 
+        \textbf{Convective flux} & 4.9075 W & -23.8063 W & 0 & 0 \\ 
         \hline
         \end{tabular}
     \caption{Values of the diffusive and convective thermal flux at the boundaries.}
     \label{boundary_thermal_conservation}
 \end{table}
 
-The global thermal energy balance, considering all the contributions, is $.$. This shows that in the simulation the total energy is conserved.
+The global thermal energy balance, considering all the contributions, is -0.5476 W. This value is very close to the ideal value of zero. The small, non-zero result is an expected and unavoidable consequence of numerical simulation, it stems from the discretization error, as the Finite Volume Method solves a discretized approximation of the continuous governing energy equation.
 
 \bigskip
 
 \textbf{22. Non uniform wall boundary conditions.}
-que
+We will now investigate the effect of non uniform wall boundary conditions, to simulate the effect of a localized heating. For both the upper and lower wall we set a positive heat flux $q_{wall} = k\frac{\partial T}{\partial n}$ in the region $ 2 \leq x \leq 5$ and adiabatic wall condition ($k\frac{\partial T}{\partial n}=0$) everywhere else. The goal is to find values of $q_{wall}$ required to reach an average outlet temperature of 60$^\circ$C, 70$^\circ$C and 80$^\circ$C. Running the proposed simulation setup for different values of $q_{wall}$ ranging from 0 to 10 we get the plot shown in \ref{outTemp_wrt_qwall_mixedNeu} .
+Observing that the trend is perfectly linear we find some proposed $q_{wall}$ values by inverting the equation and check that they provide the expected temperature outpus by rerunning the simulation. Indeed, average outlet temperatures resulting from proposed $q_{wall}$ match the expected ones. Our findings are summarised in Table \ref{non_uniform_boundary_condition}.
+
+\begin{table}[H]
+    \centering
+        \begin{tabular}{|c|c|} 
+        \hline
+        \textbf{Outlet temperature} & $\mathbf{q_{wall}}$ \\ 
+        \hline
+        60$^\circ$C & 1.516750  \\ 
+        \hline
+        70$^\circ$C & 3.033500  \\ 
+        \hline
+        80$^\circ$C & 4.550250 \\ 
+        \hline
+        \end{tabular}
+    \caption{Values of $q_{wall}$ needed to reach the specified outlet temperature.}
+    \label{non_uniform_boundary_condition}
+\end{table}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Latex/MATLABfigures/22_1.png} 
+    \caption{Average outlet temperature resulting from simulations run applying mixed Neumann condition using different values of $q_{wall}$ }
+    \label{outTemp_wrt_qwall_mixedNeu}
+\end{figure} 
 
 \bibliographystyle{plain}
 \bibliography{literature}
